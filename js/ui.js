@@ -602,12 +602,66 @@ window.NimbusUI = (() => {
     function capitalize(s) { return s ? s.split(' ').map(w => w[0].toUpperCase() + w.slice(1)).join(' ') : ''; }
     function formatDate(d) { return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); }
 
+    function confirmLocation(city, country) {
+        return new Promise(resolve => {
+            const existing = document.getElementById('locationConfirmModal');
+            if (existing) existing.remove();
+
+            const flag = country ? country.toUpperCase().replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397)) : '📍';
+            const label = country ? `${city}, ${country}` : city;
+
+            const modal = document.createElement('div');
+            modal.id = 'locationConfirmModal';
+            modal.style.cssText = `
+                position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+                z-index:9999;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);
+                animation:lcmFadeIn 0.25s ease;
+            `;
+            modal.innerHTML = `
+                <style>
+                @keyframes lcmFadeIn{from{opacity:0;transform:scale(0.93)}to{opacity:1;transform:scale(1)}}
+                #lcmCard{background:rgba(18,18,35,0.95);border:1px solid rgba(255,255,255,0.12);
+                  border-radius:20px;padding:36px 32px 28px;max-width:340px;width:90%;text-align:center;
+                  box-shadow:0 24px 60px rgba(0,0,0,0.6);font-family:inherit;}
+                #lcmIcon{font-size:2.8rem;margin-bottom:12px;line-height:1;}
+                #lcmTitle{font-size:1rem;color:rgba(255,255,255,0.55);margin-bottom:4px;letter-spacing:0.04em;text-transform:uppercase;font-size:0.75rem;}
+                #lcmCity{font-size:1.6rem;font-weight:700;color:#fff;margin-bottom:6px;}
+                #lcmSub{font-size:0.82rem;color:rgba(255,255,255,0.4);margin-bottom:28px;}
+                #lcmBtns{display:flex;gap:12px;justify-content:center;}
+                .lcmBtn{flex:1;padding:11px 0;border-radius:12px;border:none;cursor:pointer;
+                  font-size:0.95rem;font-weight:600;transition:all 0.18s ease;font-family:inherit;}
+                #lcmConfirm{background:linear-gradient(135deg,#6c63ff,#a78bfa);color:#fff;}
+                #lcmConfirm:hover{filter:brightness(1.15);transform:translateY(-1px);}
+                #lcmSearch{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.75);border:1px solid rgba(255,255,255,0.12);}
+                #lcmSearch:hover{background:rgba(255,255,255,0.14);color:#fff;}
+                </style>
+                <div id="lcmCard">
+                  <div id="lcmIcon">${flag}</div>
+                  <div id="lcmTitle">📡 Location Detected</div>
+                  <div id="lcmCity">${label}</div>
+                  <div id="lcmSub">Is this your current location?</div>
+                  <div id="lcmBtns">
+                    <button class="lcmBtn" id="lcmConfirm">✓ Yes, use this</button>
+                    <button class="lcmBtn" id="lcmSearch">🔍 Search instead</button>
+                  </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            const cleanup = () => modal.remove();
+            document.getElementById('lcmConfirm').addEventListener('click', () => { cleanup(); resolve(true); });
+            document.getElementById('lcmSearch').addEventListener('click', () => { cleanup(); resolve(false); });
+            modal.addEventListener('click', e => { if (e.target === modal) { cleanup(); resolve(false); } });
+        });
+    }
+
     return {
         showLoading, showError, showDashboard, runSplash, startClock,
         renderWeather, rerenderUnit, renderForecast, updateUnitUI,
         renderAutoComplete, renderHistorySuggestions, hideSuggestions,
         toggleSearchBar, setRefreshSpinning, setRefreshSynced,
         setLocating, setLocateLocked,
-        initParallax, applyTheme, els,
+        initParallax, applyTheme, confirmLocation, els,
     };
 })();

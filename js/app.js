@@ -21,6 +21,7 @@
             ]);
             NimbusState.set({ weatherData: weather, forecastData: forecast, lastUpdated: new Date(), hasError: false });
             NimbusState.addHistory(weather.name);
+            NimbusState.saveLastCity(weather.name);
             NimbusUI.renderWeather(weather, forecast, unit);
             success = true;
         } catch (err) {
@@ -52,6 +53,7 @@
                 lastUpdated: new Date(), currentCity: weather.name, hasError: false
             });
             NimbusState.addHistory(weather.name);
+            NimbusState.saveLastCity(weather.name);
             NimbusUI.renderWeather(weather, forecast, unit);
             success = true;
         } catch (err) {
@@ -78,13 +80,35 @@
     }
 
     async function autoLoad() {
+        const lastCity = NimbusState.getLastCity();
+        if (lastCity) {
+            await loadByCity(lastCity);
+            return;
+        }
         NimbusUI.showLoading('Detecting your location…', '🌍');
         NimbusUI.setLocating(true);
         try {
             const { lat, lon } = await NimbusAPI.getUserCoords();
-            await loadByCoords(lat, lon);
+            NimbusUI.showLoading('Resolving city name…', '📍');
+            const loc = await NimbusAPI.reverseGeocode(lat, lon);
+            const detectedCity = loc.name && loc.name !== 'Your Location' ? loc.name : null;
+            if (detectedCity) {
+                const confirmed = await NimbusUI.confirmLocation(detectedCity, loc.country);
+                if (confirmed) {
+                    await loadByCoords(lat, lon);
+                } else {
+                    NimbusUI.setLocating(false);
+                    NimbusUI.toggleSearchBar(true);
+                    setTimeout(() => NimbusUI.els.cityInput.focus(), 160);
+                    return;
+                }
+            } else {
+                await loadByCoords(lat, lon);
+            }
         } catch (_) {
-            await loadByCity('London');
+            NimbusUI.setLocating(false);
+            NimbusUI.toggleSearchBar(true);
+            setTimeout(() => NimbusUI.els.cityInput.focus(), 160);
         } finally {
             NimbusUI.setLocating(false);
         }

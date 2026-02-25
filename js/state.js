@@ -71,6 +71,7 @@ window.NimbusState = (() => {
   }
 
   const UNIT_KEY = 'nimbus_unit';
+  const LAST_CITY_KEY = 'nimbus_last_city';
 
   function loadUnit() {
     const saved = localStorage.getItem(UNIT_KEY);
@@ -91,11 +92,19 @@ window.NimbusState = (() => {
     return next;
   }
 
+  function saveLastCity(city) {
+    try { localStorage.setItem(LAST_CITY_KEY, city); } catch (_) { }
+  }
+
+  function getLastCity() {
+    try { return localStorage.getItem(LAST_CITY_KEY) || null; } catch (_) { return null; }
+  }
+
   function init() {
     loadHistory();
     loadUnit();
   }
 
-  return { on, set, get, init, addHistory, clearHistory, toggleUnit, saveUnit };
+  return { on, set, get, init, addHistory, clearHistory, toggleUnit, saveUnit, saveLastCity, getLastCity };
 
 })();

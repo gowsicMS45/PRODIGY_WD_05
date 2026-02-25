@@ -207,13 +207,19 @@ window.NimbusAPI = (() => {
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) { reject(new Error('Geolocation not supported.')); return; }
             navigator.geolocation.getCurrentPosition(
-                p => resolve({ lat: p.coords.latitude, lon: p.coords.longitude }),
+                p => {
+                    const lat = p.coords.latitude;
+                    const lon = p.coords.longitude;
+                    const acc = p.coords.accuracy;
+                    console.log(`[Nimbus] GPS fix → lat:${lat}, lon:${lon}, accuracy:${acc}m (source: ${acc < 100 ? 'GPS' : 'Network/IP'})`);
+                    resolve({ lat, lon });
+                },
                 e => reject(new Error(
                     e.code === 1 ? 'Location denied. Please search manually.' :
                         e.code === 2 ? 'Location unavailable. Please search manually.' :
                             'Location timed out. Please try again.'
                 )),
-                { timeout: 8000, maximumAge: 60000 }
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
         });
     }
@@ -255,7 +261,7 @@ window.NimbusAPI = (() => {
         DEMO_MODE, searchCities,
         getCurrentWeatherByCity, getCurrentWeatherByCoords,
         getForecastByCity, getForecastByCoords,
-        getUserCoords, getIconUrl,
+        getUserCoords, reverseGeocode, getIconUrl,
         getWeatherTheme, getParticleMode,
         formatUnixTime, isNightTime,
     };
