@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="NimbusCast — Cinematic real-time weather dashboard. Live forecasts, dynamic backgrounds, and immersive animations. No API key needed." />
+    <title>NimbusCast — Cinematic Weather</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/buttons.css" />
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌤</text></svg>" />
+</head>
+
+<body class="weather-sunny" id="app-body">
+
+    <div class="bg-stage" id="bgStage" aria-hidden="true">
+        <div class="bg-layer bg-gradient" id="bgGradient"></div>
+        
+        <div class="bg-layer bg-depth-1" id="bgDepth1"></div>
+        <div class="bg-layer bg-depth-2" id="bgDepth2"></div>
+        <canvas class="bg-layer bg-particles" id="particleCanvas"></canvas>
+        <div class="bg-layer bg-rays" id="bgRays" aria-hidden="true">
+            <div class="ray ray-1"></div>
+            <div class="ray ray-2"></div>
+            <div class="ray ray-3"></div>
+            <div class="ray ray-4"></div>
+            <div class="ray ray-5"></div>
+        </div>
+        <div class="bg-layer bg-vignette"></div>
+    </div>
+
+    <div class="intro-splash" id="introSplash" aria-live="polite">
+        <div class="splash-inner">
+            <div class="splash-icon">🌤</div>
+            <h1 class="splash-title">NimbusCast</h1>
+            <p class="splash-tagline">Loading your sky…</p>
+            <div class="splash-bar">
+                <div class="splash-bar-fill" id="splashBarFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <main class="app-shell" id="appShell" role="main">
+
+        <header class="top-bar" role="banner">
+            <div class="brand">
+                <span class="brand-icon" aria-hidden="true">🌤</span>
+                <span class="brand-name">NimbusCast</span>
+            </div>
+
+            <div class="search-wrapper" role="search">
+                <button class="search-toggle-btn" id="searchToggleBtn" aria-label="Toggle search" aria-expanded="false">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                    </svg>
+                </button>
+                <div class="search-bar" id="searchBar" role="combobox" aria-expanded="false" aria-haspopup="listbox">
+                    <input type="text" class="search-input" id="cityInput" placeholder="Search city…" autocomplete="off"
+                        aria-label="Enter city name" aria-autocomplete="list" aria-controls="searchSuggestions" />
+                    <button class="search-submit-btn" id="searchSubmitBtn" aria-label="Search weather">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="M21 21l-4.35-4.35" />
+                        </svg>
+                    </button>
+                    <ul class="search-suggestions" id="searchSuggestions" role="listbox" aria-label="City suggestions">
+                    </ul>
+                </div>
+            </div>
+
+            <div class="top-bar-actions">
+                <button class="unit-toggle" id="unitToggleBtn" aria-label="Toggle temperature unit"
+                    title="Switch °C / °F">
+                    <span class="unit-opt unit-c" id="unitC">°C</span>
+                    <span class="unit-sep">/</span>
+                    <span class="unit-opt unit-f" id="unitF">°F</span>
+                </button>
+                <button class="locate-btn" id="locateBtn" aria-label="Detect my location" title="Detect my location">
+                    <div class="lb-ring lb-r1"></div>
+                    <div class="lb-ring lb-r2"></div>
+                    <div class="lb-ring lb-r3"></div>
+                    <div class="lb-scan"></div>
+                    <div class="lb-core">
+                        <svg class="lb-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3" />
+                            <line x1="12" y1="1" x2="12" y2="5" />
+                            <line x1="12" y1="19" x2="12" y2="23" />
+                            <line x1="1" y1="12" x2="5" y2="12" />
+                            <line x1="19" y1="12" x2="23" y2="12" />
+                        </svg>
+                        <div class="lb-lock-flash"></div>
+                    </div>
+                    <span class="lb-label">Locate</span>
+                </button>
+
+                <button class="refresh-btn" id="refreshBtn" aria-label="Refresh weather data" title="Sync weather data">
+                    <div class="rb-orbit"></div>
+                    <div class="rb-burst" id="rbBurst"></div>
+                    <div class="rb-core">
+                        <svg class="rb-icon" width="17" height="17" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 4v6h-6" />
+                            <path d="M1 20v-6h6" />
+                            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+                        </svg>
+                        <div class="rb-flash"></div>
+                    </div>
+                    <span class="rb-label" id="rbLabel">Sync</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="content-area">
+
+            <div class="state-view loading-view" id="loadingView" aria-live="polite">
+                <div class="loader-orb">
+                    <div class="orb-ring orb-ring-1"></div>
+                    <div class="orb-ring orb-ring-2"></div>
+                    <div class="orb-ring orb-ring-3"></div>
+                    <div class="orb-core"><span class="orb-emoji" id="loaderEmoji">⛅</span></div>
+                </div>
+                <p class="loading-text" id="loadingText">Fetching your weather…</p>
+            </div>
+
+            <div class="state-view error-view hidden" id="errorView" role="alert" aria-live="assertive">
+                <div class="error-icon">😶‍🌫️</div>
+                <h2 class="error-title">Couldn't reach the sky</h2>
+                <p class="error-msg" id="errorMsg">Please check the city name or try again.</p>
+                <button class="btn-retry" id="retryBtn">Try Again</button>
+            </div>
+
+            <div class="dashboard hidden" id="dashboard">
+
+                <section class="primary-panel glass-panel" aria-label="Current weather">
+                    <div class="panel-header">
+                        <div class="location-info">
+                            <div class="location-pin" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="city-name" id="cityName">—</h2>
+                                <p class="country-name" id="countryName">—</p>
+                            </div>
+                        </div>
+                        <div class="live-clock" id="liveClock" aria-live="polite">00:00:00</div>
+                    </div>
+
+                    <div class="temp-hero">
+                        <div class="weather-icon-float" id="weatherIconWrap" aria-hidden="true">
+                            <img class="weather-icon-img" id="weatherIconImg" src="" alt="Weather condition icon" />
+                        </div>
+                        <div class="temp-display">
+                            <span class="temp-value" id="tempValue">--</span>
+                            <span class="temp-unit-display" id="tempUnitDisplay">°C</span>
+                        </div>
+                    </div>
+
+                    <div class="condition-row">
+                        <p class="condition-label" id="conditionLabel">—</p>
+                        <p class="date-label" id="dateLabel">—</p>
+                    </div>
+
+                    <div class="panel-bottom-row">
+                        <span class="feels-chip">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+                            </svg>
+                            Feels like <strong id="feelsLikeVal">--</strong>
+                        </span>
+                        <div class="sparkline-wrap" id="sparklineWrap" aria-label="Temperature trend"></div>
+                    </div>
+
+                    <div class="advice-strip" id="adviceText" aria-live="polite">🌤 Loading weather advice…</div>
+                </section>
+
+                <div class="stat-cards-row" role="list" aria-label="Weather details">
+
+                    <div class="stat-card glass-panel" role="listitem">
+                        <div class="stat-icon">💧</div>
+                        <div class="stat-body">
+                            <span class="stat-label">Humidity</span>
+                            <span class="stat-value" id="humidityVal">--%</span>
+                        </div>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill humidity-bar" id="humidityBar"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-panel wind-card" role="listitem">
+                        <div class="stat-icon">🌬</div>
+                        <div class="stat-body">
+                            <span class="stat-label">Wind</span>
+                            <span class="stat-value" id="windVal">-- km/h</span>
+                            <span class="wind-dir-label" id="windDirLabel">--</span>
+                        </div>
+                        <div class="compass-wrap" aria-hidden="true">
+                            <div class="compass-ring">
+                                <span class="c-n">N</span><span class="c-s">S</span>
+                                <span class="c-e">E</span><span class="c-w">W</span>
+                                <div class="compass-needle" id="compassNeedle"></div>
+                            </div>
+                        </div>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill wind-bar" id="windBar"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-panel" role="listitem">
+                        <div class="stat-icon">🔆</div>
+                        <div class="stat-body">
+                            <span class="stat-label">UV Index</span>
+                            <span class="stat-value" id="uvVal">--</span>
+                            <span class="uv-level-label" id="uvLevel">--</span>
+                        </div>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill uv-bar" id="uvBar"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-panel" role="listitem">
+                        <div class="stat-icon">👁</div>
+                        <div class="stat-body">
+                            <span class="stat-label">Visibility</span>
+                            <span class="stat-value" id="visibilityVal">-- km</span>
+                        </div>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill visibility-bar" id="visibilityBar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="forecast-section glass-panel" aria-label="5-hour forecast">
+                    <div class="section-header">
+                        <h3 class="section-title">⏱ Hourly Forecast</h3>
+                        <span class="section-sub">Next 5 intervals</span>
+                    </div>
+                    <div class="forecast-scroll" id="forecastScroll" role="list"></div>
+                </section>
+
+                <div class="extra-row">
+                    <div class="extra-card glass-panel">
+                        <span class="extra-label">🌅 Sunrise</span>
+                        <span class="extra-val" id="sunriseVal">--:--</span>
+                    </div>
+                    <div class="extra-card glass-panel">
+                        <span class="extra-label">🌇 Sunset</span>
+                        <span class="extra-val" id="sunsetVal">--:--</span>
+                    </div>
+                    <div class="extra-card glass-panel">
+                        <span class="extra-label">🔵 Pressure</span>
+                        <span class="extra-val" id="pressureVal">-- hPa</span>
+                    </div>
+                    <div class="extra-card glass-panel">
+                        <span class="extra-label">💦 Dew Point</span>
+                        <span class="extra-val" id="dewPointVal">--°</span>
+                    </div>
+                    <div class="extra-card glass-panel">
+                        <span class="extra-label">🌡 Min / Max</span>
+                        <span class="extra-val" id="minMaxVal">-- / --</span>
+                    </div>
+                    <div class="extra-card glass-panel">
+                        <span class="extra-label">🌂 Rain Chance</span>
+                        <span class="extra-val" id="precipVal">--%</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="app-footer" role="contentinfo">
+            <span>NimbusCast © 2025</span>
+        </footer>
+    </main>
+
+    <script src="js/state.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
