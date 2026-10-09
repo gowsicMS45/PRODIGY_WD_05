@@ -1,67 +1,57 @@
-# PRODIGY_WD_05
+# Weather Web App
 
-## Task-05: Cinematic Weather Web Application
+A cinematic weather application built with HTML, CSS, and JavaScript as part of the Prodigy InfoTech Web Development Internship.
 
-### Description
-This project is a dynamic and visually immersive **Weather Web Application** developed as **Task-05** of the **Web Development Internship at Prodigy InfoTech**.
+## Overview
 
-The application fetches real-time weather data using a weather API and displays it through an interactive, responsive, and animated user interface.
+This project fetches real-time weather data and presents it through an interactive, responsive interface. It supports city search, location-based weather, unit switching, recent search history, and dynamic weather-based visuals.
 
----
+## Features
 
-### Features
-
-#### 🌍 Core Functionality
-- Fetch real-time weather data using a public Weather API
-- Detect user location using the Geolocation API
+- Fetch real-time weather data using a public weather API
+- Detect user location with the Geolocation API
 - Search weather by city name
-- Display:
-  - Temperature  
-  - Weather condition  
-  - Feels like temperature  
-  - Humidity  
-  - Wind speed  
-  - Location name  
-  - Date and time  
+- Display temperature, condition, feels-like value, humidity, wind speed, location, date, and time
+- Dynamic full-screen background based on weather conditions
+- Glassmorphism weather information panel
+- Animated weather icons and smooth transitions
+- Loading and error states
+- Celsius/Fahrenheit unit toggle
+- Recent search history using localStorage
+- Refresh button for updated weather data
+- Fully responsive layout
 
-#### 🎨 UI & Experience
-- Dynamic full-screen background based on weather conditions  
-- Glassmorphism weather information panel  
-- Animated weather icons and smooth transitions  
-- Loading state while fetching data  
-- Error handling for invalid city or API issues  
-- Fully responsive layout (mobile-friendly)  
+## Tech Stack
 
-#### ⚙️ Interactive Features
-- Celsius ↔ Fahrenheit unit toggle  
-- Recent search history using localStorage  
-- Refresh button for updated weather data  
-- Live clock display  
+- HTML
+- CSS
+- JavaScript
+- Fetch API
+- Geolocation API
+- localStorage
 
----
+## Project Structure
 
-### Technologies Used
-- HTML  
-- CSS  
-- JavaScript  
-- Fetch API  
-- Geolocation API  
-(No external frameworks)
+```text
+css/
+  buttons.css
+  style.css
+js/
+  api.js
+  app.js
+  state.js
+  ui.js
+index.html
+```
 
----
+## How It Works
 
-### How It Works
-- The application requests weather data from the API using JavaScript Fetch.  
-- If location access is granted, it automatically loads the user's local weather.  
-- Users can also search for any city manually.  
-- UI updates dynamically based on the received weather data.  
-- Recent searches are stored using localStorage for quick access.
----
+The app requests weather data using JavaScript Fetch. If location permission is granted, it loads the user's local weather automatically. Users can also search for any city manually. The UI updates dynamically based on the received weather data, and recent searches are stored locally for quick access.
 
-### Author
-**Gowsic M S**
+## Author
 
----
+Gowsic M S
 
-### Internship
-**Prodigy InfoTech – Web Development Internship**
+## Internship
+
+Prodigy InfoTech - Web Development Internship
